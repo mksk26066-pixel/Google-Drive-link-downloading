@@ -1,0 +1,6 @@
+{
+  "name": "Clean Downloads",
+  "description": "An ultra-minimal, premium private download page for custom cloud files.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

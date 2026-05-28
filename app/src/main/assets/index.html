@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Clean Downloads</title>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Design System Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap font-display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS variables for dynamic customization */
+        :root {
+            --bg-base: #090b0e;
+            --bg-surface: rgba(18, 22, 28, 0.65);
+            --bg-card: rgba(22, 28, 36, 0.45);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(6, 182, 212, 0.3);
+            
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --accent-glow: #06b6d4;     /* Cyber Cyan */
+            --accent-glow-rgb: 6, 182, 212;
+            --accent-active: #4ef2d2;   /* Neon Turquoise */
+            
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.4);
+            --transition-swift: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Base rules */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.04) 0%, transparent 40%);
+            background-attachment: fixed;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Top Bar Indicator (Private secure index header) */
+        .header-section {
+            padding: 24px 20px 16px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .system-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+            padding: 4px 12px;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 8px;
+        }
+
+        .system-badge .pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse-breathing 2s infinite ease-in-out;
+        }
+
+        /* Search Filter Input (Premium Minimal Capsule) */
+        .search-container {
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            margin: 12px 0 28px 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 14px 16px 14px 44px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition-swift);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 14px;
+            pointer-events: none;
+            transition: var(--transition-swift);
+        }
+
+        .search-container:focus-within i {
+            color: var(--accent-glow);
+        }
+
+        /* Responsive Grid Content Container */
+        .downloads-wrapper {
+            flex-grow: 1;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .grid-layout {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 18px;
+            }
+        }
+
+        /* File Card Styling - Ultra Glassmorphism Minimal */
+        .file-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-swift);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .file-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(6, 182, 212, 0.03), transparent 50%);
+            opacity: 0;
+            transition: var(--transition-swift);
+            pointer-events: none;
+        }
+
+        /* Hover Lift Actions */
+        .file-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-lg), 0 0 20px rgba(6, 182, 212, 0.05);
+        }
+
+        .file-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Header info in the card */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+
+        .file-icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            transition: var(--transition-swift);
+        }
+
+        .file-card:hover .file-icon-box {
+            color: var(--accent-glow);
+            background: rgba(6, 182, 212, 0.08);
+            border-color: rgba(6, 182, 212, 0.2);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.05);
+        }
+
+        .file-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .file-title {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            word-break: break-all;
+        }
+
+        .file-size-subtitle {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            color: var(--accent-glow);
+            opacity: 0.9;
+            margin-top: 1px;
+            letter-spacing: 0.02em;
+        }
+
+        .file-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .status-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--accent-active);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .card-progress-bar-container {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            position: relative;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card-progress-bar-container.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-glow), var(--accent-active));
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+
+        .badge-type {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            padding: 1px 4px;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        /* Custom Colors for badges based on category */
+        .badge-type-cfg { color: #f59e0b; }
+        .badge-type-bin { color: #ef4444; }
+        .badge-type-apk { color: #10b981; }
+        .badge-type-zip { color: #3b82f6; }
+        .badge-type-json { color: #8b5cf6; }
+        .badge-type-img { color: #ec4899; }
+        .badge-type-dll { color: #06b6d4; }
+        .badge-type-txt { color: #94a3b8; }
+
+        /* Premium Download Button with complete interaction mechanics */
+        .download-button {
+            width: 100%;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-swift);
+            z-index: 1;
+        }
+
+        .download-button::after {
+            content: '';
+            position: absolute;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+            width: 120px;
+            height: 120px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.4s ease-out;
+            pointer-events: none;
+        }
+
+        .download-button:hover {
+            background: rgba(6, 182, 212, 0.05);
+            border-color: rgba(6, 182, 212, 0.3);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+        }
+
+        .download-button:active {
+            transform: scale(0.97);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .download-button:hover::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Success & loading state classes injected via JS */
+        .download-button.loading {
+            background: rgba(6, 182, 212, 0.08);
+            border-color: var(--accent-glow);
+            color: var(--accent-active);
+            cursor: wait;
+            pointer-events: none;
+            animation: pulse-glow 1.5s infinite steps(16);
+        }
+
+        .download-button.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+            color: #10b981;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* Material Ripple effect helper */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(6, 182, 212, 0.25);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+
+        /* Keyframe animations */
+        @keyframes pulse-breathing {
+            0%, 100% {
+                opacity: 0.8;
+                box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+            }
+            50% {
+                opacity: 1;
+                box-shadow: 0 0 10px rgba(16, 185, 129, 0.9);
+            }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 24px rgba(6, 182, 212, 0.4);
+            }
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Spinner class */
+        .spinner {
+            animation: rotate 1s linear infinite;
+        }
+
+        @keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* No search results card */
+        .empty-state {
+            grid-column: 1 / -1;
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: var(--bg-surface);
+            border: 1px dashed var(--border-color);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .empty-state i {
+            font-size: 28px;
+            color: var(--text-muted);
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Bottom status info */
+        .footer-note {
+            text-align: center;
+            padding: 30px 20px;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Upper Secure Header -->
+    <header class="header-section">
+        <div class="system-badge">
+            <span class="pulse-dot"></span>
+            Private Cloud Index
+        </div>
+        
+        <!-- Minimal Filter Field -->
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" class="search-input" id="filterInput" placeholder="Filter secure index items..." autocomplete="off">
+        </div>
+    </header>
+
+    <!-- Main Dynamic Grid -->
+    <main class="downloads-wrapper">
+        <div class="grid-layout" id="downloadsGrid">
+            <!-- Dynamically populated via JS -->
+        </div>
+    </main>
+
+    <!-- Tiny minimal footer signal -->
+    <footer class="footer-note">
+        System active &bull; AES-256 Encrypted Transfer
+    </footer>
+
+    <!-- JavaScript Data and Controller logic -->
+    <script>
+        // Dynamically generated personal download links with beautiful premium custom mock filenames & sizes
+        const downloadItems = [
+            {
+                id: 1,
+                name: "system_config.cfg",
+                desc: "High-performance optimized engine setups.",
+                url: "https://drive.google.com/uc?export=download&id=1eOmShUCexkuNpb0IJfcUcq8RRe3zezzv",
+                type: "cfg",
+                size: "4.8 KB",
+                icon: "fa-solid fa-sliders"
+            },
+            {
+                id: 2,
+                name: "core_bypass_v2.bin",
+                desc: "Secure kernel overlay subsystem firmware.",
+                url: "https://drive.google.com/uc?export=download&id=1O90Y0GczBuRcqHLJ_ljxCPuyeLER6ACI",
+                type: "bin",
+                size: "1.2 MB",
+                icon: "fa-solid fa-terminal"
+            },
+            {
+                id: 3,
+                name: "network_tool.sh",
+                desc: "Automatic diagnostics & telemetry route suite.",
+                url: "https://drive.google.com/uc?export=download&id=1qBooOk_CBdQjTv5NU8CptWMDiz1WN1Ws",
+                type: "bin",
+                size: "82 KB",
+                icon: "fa-solid fa-network-wired"
+            },
+            {
+                id: 4,
+                name: "private_keys.enc",
+                desc: "Encrypted secure keystore authentication files.",
+                url: "https://drive.google.com/uc?export=download&id=1OdhUoZd5fC7H1dN-cr04XTJOajZ5wkXu",
+                type: "cfg",
+                size: "12 KB",
+                icon: "fa-solid fa-key"
+            },
+            {
+                id: 5,
+                name: "security_patch_v4.apk",
+                desc: "Upgraded android platform runtime library.",
+                url: "https://drive.google.com/uc?export=download&id=1SWfr7-pFwGBbP-VaQf0QbTpHWoAh3UOp",
+                type: "apk",
+                size: "14.2 MB",
+                icon: "fa-brands fa-android"
+            },
+            {
+                id: 6,
+                name: "cloud_backup_manifest.json",
+                desc: "Secure deployment system catalog mapping database.",
+                url: "https://drive.google.com/uc?export=download&id=13yYcc-1AcSmuRP61mIUn9Qv4rk0uxWXL",
+                type: "json",
+                size: "245 KB",
+                icon: "fa-solid fa-database"
+            },
+            {
+                id: 7,
+                name: "root_firmware_recovery.img",
+                desc: "Raw low-level recovery flash architecture schema.",
+                url: "https://drive.google.com/file/d/17-nbLIfTGJLV1-qac8vZWzLl7FtZ_yEO/view?usp=drivesdk",
+                type: "img",
+                size: "64.0 MB",
+                icon: "fa-solid fa-floppy-disk"
+            },
+            {
+                id: 8,
+                name: "terminal_color_scheme.conf",
+                desc: "Custom obsidian dark shell profiles layout.",
+                url: "https://drive.google.com/uc?export=download&id=1sItaWXsoGLfm09sIE8i_Hx2y-_2EBVcH",
+                type: "cfg",
+                size: "8.1 KB",
+                icon: "fa-solid fa-palette"
+            },
+            {
+                id: 9,
+                name: "high_speed_driver.dll",
+                desc: "Low-overhead direct system accelerator asset.",
+                url: "https://drive.google.com/uc?export=download&id=1kF-R95oMlbj5ie1l1XinMKlGZv0DSGM2",
+                type: "dll",
+                size: "3.4 MB",
+                icon: "fa-solid fa-microchip"
+            },
+            {
+                id: 10,
+                name: "database_snapshot.sql",
+                desc: "Aggregated backup archive transactional schema.",
+                url: "https://drive.google.com/uc?export=download&id=1kKhJ3_eUUyndgOryWfZh7LDm6u7qvKcb",
+                type: "json",
+                size: "18.5 MB",
+                icon: "fa-solid fa-server"
+            },
+            {
+                id: 11,
+                name: "custom_boot_animation.zip",
+                desc: "Framerate optimized system initiation graphic.",
+                url: "https://drive.google.com/uc?export=download&id=1lO1DdoyvqXG9LAolha-pmxFQs2VmgFGg",
+                type: "zip",
+                size: "4.7 MB",
+                icon: "fa-solid fa-file-zipper"
+            },
+            {
+                id: 12,
+                name: "sound_equalizer_preset.eq",
+                desc: "Enhanced atmospheric frequency resonance layouts.",
+                url: "https://drive.google.com/uc?export=download&id=1oQ8XEtoi81M8DFyPDj94WnU7_p-gOmm0",
+                type: "cfg",
+                size: "920 B",
+                icon: "fa-solid fa-music"
+            },
+            {
+                id: 13,
+                name: "memory_optimizer_v1.sh",
+                desc: "Optimized virtual heap runtime release tool.",
+                url: "https://drive.google.com/uc?export=download&id=1HmcVk4NRfUaFuAeUdNhLGpkW5SLvPmdi",
+                type: "bin",
+                size: "14 KB",
+                icon: "fa-solid fa-bolt"
+            },
+            {
+                id: 14,
+                name: "automation_routine.py",
+                desc: "Automated cron triggers & sync execution tasks.",
+                url: "https://drive.google.com/uc?export=download&id=1iCi9sS7FTKhufg5pE3UlKA3haqRGLTTz",
+                type: "bin",
+                size: "320 KB",
+                icon: "fa-solid fa-gears"
+            },
+            {
+                id: 15,
+                name: "decryption_module.so",
+                desc: "Native crypto runtime binary integration layer.",
+                url: "https://drive.google.com/uc?export=download&id=1FXKDzgjeSaWrGiWoXmhcDu4kwYjT_-8g",
+                type: "bin",
+                size: "1.1 MB",
+                icon: "fa-solid fa-shield-halved"
+            },
+            {
+                id: 16,
+                name: "diagnostic_log.txt",
+                desc: "Secure transaction audit execution trail output.",
+                url: "https://drive.google.com/uc?export=download&id=1Ky2oZculYVx50E6l_x5pRByPsXNNU8Xc",
+                type: "txt",
+                size: "820 KB",
+                icon: "fa-solid fa-receipt"
+            }
+        ];
+
+        // View Controller
+        const downloadsGrid = document.getElementById("downloadsGrid");
+        const filterInput = document.getElementById("filterInput");
+
+        // Render download list dynamically
+        function renderItems(itemsToRender) {
+            downloadsGrid.innerHTML = "";
+
+            if (itemsToRender.length === 0) {
+                downloadsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-ban"></i>
+                        <p>No matching private assets found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            itemsToRender.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "file-card";
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="file-icon-box">
+                            <i class="${item.icon}"></i>
+                        </div>
+                        <div class="file-info">
+                            <span class="file-title">${item.name}</span>
+                            <span class="file-size-subtitle">${item.size}</span>
+                            <div class="file-meta-row">
+                                <span class="badge-type badge-type-${item.type}">${item.type.toUpperCase()}</span>
+                                <span class="bullet" style="display: none;">&bull;</span>
+                                <span class="status-text" style="display: none;">Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-progress-bar-container">
+                        <div class="card-progress-bar"></div>
+                    </div>
+                    <button class="download-button" onclick="handleDownload(event, this, '${item.url}', '${item.name}')">
+                        <i class="fa-solid fa-arrow-down-long"></i>
+                        <span class="btn-text">Download</span>
+                    </button>
+                `;
+                downloadsGrid.appendChild(card);
+            });
+        }
+
+        // Search Filter Interaction logic
+        filterInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const filtered = downloadItems.filter(item => 
+                item.name.toLowerCase().includes(query) || 
+                item.desc.toLowerCase().includes(query) ||
+                item.type.toLowerCase().includes(query)
+            );
+            renderItems(filtered);
+        });
+
+        // Elite dynamic download action with native-feel responses
+        function handleDownload(event, btn, url, filename) {
+            // Add custom Material ripple effect inside the clicked coordinates
+            createRipple(event, btn);
+
+            const card = btn.closest(".file-card");
+            const progressContainer = card.querySelector(".card-progress-bar-container");
+            const progressBar = card.querySelector(".card-progress-bar");
+            const statusText = card.querySelector(".status-text");
+            const bullet = card.querySelector(".bullet");
+            const btnText = btn.querySelector(".btn-text");
+            const btnIcon = btn.querySelector("i");
+
+            // Avoid double clicks
+            if (btn.classList.contains("loading")) return;
+
+            // Injected interactive state transitions
+            btn.classList.add("loading");
+            progressContainer.classList.add("active");
+            progressBar.style.width = "0%";
+            
+            if (statusText) {
+                statusText.style.display = "inline";
+                statusText.textContent = "Connecting...";
+                statusText.style.color = "var(--accent-glow)";
+            }
+            if (bullet) {
+                bullet.style.display = "inline";
+            }
+            
+            // Phase 1: Preparation stage (aesthetic transitions)
+            btnIcon.className = "fa-solid fa-circle-notch spinner";
+            btnText.textContent = "Connecting...";
+
+            let progress = 0;
+            const intervalTime = 60; // ms
+            
+            const interval = setInterval(() => {
+                // Natural download speed telemetry variations
+                const remaining = 100 - progress;
+                const increment = Math.max(1, Math.min(15, Math.floor(Math.random() * (remaining * 0.2)) + 1));
+                progress += increment;
+
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    
+                    progressBar.style.width = "100%";
+                    if (statusText) statusText.textContent = "Verifying...";
+                    btnText.textContent = "Verifying...";
+
+                    setTimeout(() => {
+                        // Handover direct drive download routing securely
+                        window.location.href = url;
+
+                        // Transition to successful phase
+                        btn.classList.remove("loading");
+                        btn.classList.add("success");
+                        btnIcon.className = "fa-solid fa-check";
+                        btnText.textContent = "Completed";
+                        if (statusText) {
+                            statusText.textContent = "Success";
+                            statusText.style.color = "#10b981";
+                        }
+
+                        // Restore original states and slide out progress bars
+                        setTimeout(() => {
+                            progressContainer.classList.remove("active");
+                            setTimeout(() => {
+                                progressBar.style.width = "0%";
+                                if (statusText) statusText.style.display = "none";
+                                if (bullet) bullet.style.display = "none";
+                            }, 400);
+
+                            btn.classList.remove("success");
+                            btnIcon.className = "fa-solid fa-arrow-down-long";
+                            btnText.textContent = "Download Again";
+                        }, 3000);
+                    }, 500);
+                } else {
+                    progressBar.style.width = `${progress}%`;
+                    
+                    if (progress < 25) {
+                        if (statusText) statusText.textContent = `Preparing... ${progress}%`;
+                        btnText.textContent = `Preparing (${progress}%)`;
+                    } else if (progress < 75) {
+                        if (statusText) statusText.textContent = `Downloading... ${progress}%`;
+                        btnText.textContent = `Downloading (${progress}%)`;
+                    } else {
+                        if (statusText) statusText.textContent = `Finalizing... ${progress}%`;
+                        btnText.textContent = `Almost there (${progress}%)`;
+                    }
+                }
+            }, intervalTime);
+        }
+
+        // Custom touch/click coordinate relative Material Ripple Generator
+        function createRipple(event, element) {
+            const circle = document.createElement("span");
+            const diameter = Math.max(element.clientWidth, element.clientHeight);
+            const radius = diameter / 2;
+
+            const rect = element.getBoundingClientRect();
+
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - rect.left - radius}px`;
+            circle.style.top = `${event.clientY - rect.top - radius}px`;
+            circle.classList.add("ripple");
+
+            // Clean up past loaded ripples
+            const ripple = element.getElementsByClassName("ripple")[0];
+            if (ripple) {
+                ripple.remove();
+            }
+
+            element.appendChild(circle);
+        }
+
+        // Perform primary rendering routines
+        renderItems(downloadItems);
+    </script>
+</body>
+</html>
